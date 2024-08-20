@@ -25,11 +25,6 @@ Run the virtual environment.
 ```bash
   source venv/bin/activate
 ```
-Install librery tesseract for python
-
-```bash
-  pip install pytesseract
-```
 
 Install all libraries and dependencies
 
