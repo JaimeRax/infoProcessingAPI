@@ -11,7 +11,7 @@ This API works for the processing of Finanssoreal information. Such as character
 Create a python virtual environment in the main project folder.
 
 ```bash
-  python -m venv venv
+  python3 -m venv venv
 ```
 
 Run the virtual environment.
@@ -48,8 +48,8 @@ To run this project, you will need to add the following environment variables to
 `DB_PASS='db_pass'`  
 `DB_HOST='127.0.0.1'`  
 `DB_PORT=3306`  
-`STORAGE_ROUTE=/home/forge/infoProcessingAPI/`
-`STORAGE_ROUTE_BD=/home/forge/api.finanssoreal.com/storage/app/Finanssoreal/`
+`STORAGE_ROUTE=name_route`
+`STORAGE_ROUTE_BD=name_route`
 
 
 ## Run Locally
