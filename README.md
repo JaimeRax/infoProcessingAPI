@@ -34,7 +34,7 @@ Install librery tesseract for python
 Install all libraries and dependencies
 
 ```bash
-  python -m pip install -r requirements.txt
+  python3 -m pip install -r requirements.txt
 ```
 
 ## Environment Variables
@@ -48,8 +48,8 @@ To run this project, you will need to add the following environment variables to
 `DB_PASS='db_pass'`  
 `DB_HOST='127.0.0.1'`  
 `DB_PORT=3306`  
-`STORAGE_ROUTE=name_route`
-`STORAGE_ROUTE_BD=name_route`
+`STORAGE_ROUTE='path_name_route'`
+`STORAGE_ROUTE_BD='path_name_route'`
 
 
 ## Run Locally
@@ -57,7 +57,7 @@ To run this project, you will need to add the following environment variables to
 With the virtual environment initialized, run:
 
 ```bash
-  python main.py
+  python3 main.py
 ```
 
 
