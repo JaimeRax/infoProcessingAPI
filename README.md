@@ -3,8 +3,6 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10.6-blue.svg)
 
-This API works for the processing of Finanssoreal information. Such as character extraction from images, face comparison, numerical analysis, etc.
-
 
 ## Installation
 
@@ -44,6 +42,7 @@ To run this project, you will need to add the following environment variables to
 `DB_HOST='127.0.0.1'`  
 `DB_PORT=3306`  
 `STORAGE_ROUTE='path_name_route'`
+
 `STORAGE_ROUTE_BD='path_name_route'`
 
 
