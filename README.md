@@ -30,6 +30,12 @@ Install all libraries and dependencies
   python3 -m pip install -r requirements.txt
 ```
 
+Check the Installation
+
+```bash
+  pip freeze
+```
+
 ## Environment Variables
 
 To run this project, you will need to add the following environment variables to your .env file in the main project directory.

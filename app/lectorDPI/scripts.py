@@ -113,11 +113,11 @@ def process_threshold(image, whitelist, context, position):
 
 def process_photo_plantilla(image, points):
    
-   plantilla = 'app/lectorDPI/plantilla.png'   
-   STORAGE_ROUTE = os.environ['STORAGE_ROUTE']
-   plantilla_path = f"{STORAGE_ROUTE}{plantilla}"
+   plantilla = '/home/jaime/Documents/university/infoProcessingAPI/app/lectorDPI/plantilla.png'   
+   # STORAGE_ROUTE = os.environ['STORAGE_ROUTE']
+   # plantilla_path = f"{STORAGE_ROUTE}{plantilla}"
    
-   imgQ = cv2.imread(plantilla_path)
+   imgQ = cv2.imread(plantilla)
    per = 25
    h,w,c = imgQ.shape
    num_keypoints = int(h * w * points)

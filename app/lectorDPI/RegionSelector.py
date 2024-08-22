@@ -26,7 +26,7 @@ def mousePoints(event,x,y,flags,params):
       circles.append([x,y,myColor])
       counter2 += 1
       
-img = cv2.imread('app/lectorDPI/plantilla.png')
+img = cv2.imread('/home/jaime/Documents/university/infoProcessingAPI/app/lectorDPI/plantilla.png')
 img = cv2.resize(img, (0,0), None, scale, scale)
 
 while True:

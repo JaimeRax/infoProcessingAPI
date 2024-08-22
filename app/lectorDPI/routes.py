@@ -23,10 +23,12 @@ def index():
 @lectorDPI.route('/extrain_info', methods=['GET'])
 def extrain_info():
     
-    image_path = request.args.get('image_path')  
-    STORAGE_ROUTE_BD = os.environ['STORAGE_ROUTE_BD']  #path for images from the database
+    # image_path = request.args.get('image_path')  
+    # print('Imagen Name: ', image_path)
+    # STORAGE_ROUTE_BD = os.environ['STORAGE_ROUTE_BD']  #path for images from the database
     
-    image_path = f"{STORAGE_ROUTE_BD}{image_path}"
+    # image_path = f"{STORAGE_ROUTE_BD}{image_path}"
+    image_path = '/home/jaime/Documents/university/infoProcessingAPI/media/chavi.png'
     results = extract_info_DPI(image_path)
     results = results.replace('\n', ' ')
 
