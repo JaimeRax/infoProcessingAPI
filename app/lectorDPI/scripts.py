@@ -22,10 +22,6 @@ roi = [
         [(294, 524), (543, 602), 'img', 'firm'] 
    ]
 
-
-#
-# thresholding values
-
 numeros = list(range(180, 48, -2))
 context = {
         '0': numeros,
@@ -37,8 +33,6 @@ context = {
         '6': numeros,
 }
 
-
-#
 # conversion of letters to numbers and numbers to letters
 
 letras_numeros = {
@@ -50,7 +44,6 @@ letras_numeros = {
       'D': '0',   'I': '1',    'C': '0', 
       'Y': '7',   'V': '7'
    }
-
 
 numeros_letras = {
       '0': 'O',
