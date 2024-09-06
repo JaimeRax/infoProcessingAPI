@@ -48,7 +48,6 @@ To run this project, you will need to add the following environment variables to
 `DB_HOST='127.0.0.1'`  
 `DB_PORT=3306`  
 `STORAGE_ROUTE='path_name_route'`
-
 `STORAGE_ROUTE_BD='path_name_route'`
 
 
