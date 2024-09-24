@@ -106,7 +106,7 @@ def process_threshold(image, whitelist, context, position):
 
 def process_photo_plantilla(image, points):
    
-   plantilla = '/home/jaime/Documents/university/infoProcessingAPI/app/lectorDPI/plantilla.png'   
+   plantilla = '/home/jaime/Documents/university/infoProcessingAPI/plantilla.png'   
    # STORAGE_ROUTE = os.environ['STORAGE_ROUTE']
    # plantilla_path = f"{STORAGE_ROUTE}{plantilla}"
    
