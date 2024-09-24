@@ -10,7 +10,7 @@ orb = cv2.ORB_create(4000)
 kp1, des1 = orb.detectAndCompute(imgQ,None)
 # impKp1 = cv2.drawKeypoints(imgQ, kp1, None)
 
-path = 'name_route'
+path = '/home/jaime/Documents/university/infoProcessingAPI/media/'
 myPiclist = os.listdir(path)
 print(myPiclist)
 
