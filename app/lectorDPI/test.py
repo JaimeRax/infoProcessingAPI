@@ -45,7 +45,7 @@ for j,y in enumerate(myPiclist):
     cv2.imshow(y, imgScan)
 
 # cv2.imshow("keyPontsQuery", impKp1)
-cv2.imshow("Output", imgQ)
+cv2.imshow("salida", imgQ)
 cv2.waitKey(0)
 
    # '/home/jaime/Documents/university/infoProcessingAPI/app/lectorDPI/plantilla.png'   
