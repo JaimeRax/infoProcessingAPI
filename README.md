@@ -57,18 +57,3 @@ With the virtual environment initialized, run:
 ```bash
   python3 main.py
 ```
-
-
-## API Reference
-
-#### Get response of facial recognition and comparison
-
-```http
-  GET /facial_recognition
-```
-
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `first_image` | `media` | **Required**. First image to compare |
-| `second_image` | `media` | **Required**. Second image to compare |
-
