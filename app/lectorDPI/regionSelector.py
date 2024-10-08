@@ -1,7 +1,6 @@
 import cv2
 import random
 
-
 scale = 1.5
 circles = []
 counter = 0
