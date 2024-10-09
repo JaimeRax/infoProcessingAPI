@@ -1,7 +1,5 @@
 #Importacion de librerias
 from flask import Flask
-
-#Importacion de rutas
 from app.lectorDPI.routes import lectorDPI
 
 #Instanciando el objeto para nuestra app

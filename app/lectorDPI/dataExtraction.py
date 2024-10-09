@@ -4,12 +4,7 @@ import numpy as np
 import pytesseract
 from tqdm import tqdm
 
-#from app.facialRecognition.scripts import facial_compare
-
-#
-# list of regions of interest
-# positions x, y 
-
+# list of regions of interest, positions x, y
 roi = [
         [(24, 164), (327, 215), 'text', 'cui'], 
         [(350, 167), (650, 242), 'text', 'name'], 
@@ -60,7 +55,6 @@ numeros_letras = {
 # function to process images with threshold values ​​and text extraction
 # receives as parameters an image, accepted list of values, context, and the position of the image       config=f"--psm 6 -c tessedit_char_whitelist={whitelist}"
 # returns the best extracted text
-
 def process_threshold(image, whitelist, context, position):
    aux_text = []
    bestText = ""
@@ -103,12 +97,9 @@ def process_threshold(image, whitelist, context, position):
 # function to create the match points and roi processing to crop the points of interest
 # receives the image and the number of coincidence points as parameters
 # returns cropped images and positions
-
 def process_photo_plantilla(image, points):
    
    plantilla = '/home/jaime/Documents/university/infoProcessingAPI/plantilla.png'   
-   # STORAGE_ROUTE = os.environ['STORAGE_ROUTE']
-   # plantilla_path = f"{STORAGE_ROUTE}{plantilla}"
    
    imgQ = cv2.imread(plantilla)
    per = 25
@@ -153,7 +144,6 @@ def process_photo_plantilla(image, points):
 # processes an image, extracts text from a specific region in the image and filters the resulting text
 # receives as parameters an image, accepted list of values, context, and the position of the image
 # returns the best extracted text
-
 def crop_information(image, index, whitelist, context):
    points = 0.01
    images_cropped, positions_x = process_photo_plantilla(image, points)
@@ -165,7 +155,6 @@ def crop_information(image, index, whitelist, context):
 # function to crop a single image of interest
 # receives as parameters an image
 # returns the cropped image
-
 def crop_firm(image_path):
    points = 0.1
    images_cropped, positions_x = process_photo_plantilla(image_path, points)
@@ -178,17 +167,13 @@ def crop_firm(image_path):
 ########################   principal function for face compare ########################                            
 #######################################################################################
 
- 
 # function to crop a single image of interest
 # receives as parameters an image
 # returns the cropped image
-
 def crop_photo(image_path):
-   
    points = 0.015
    images_cropped, positions_x = process_photo_plantilla(image_path, points)
    imagen_dpi = images_cropped[7]
-   
    altura = 600
    altura_actual, ancho_actual = imagen_dpi.shape[:2]
    factor_de_escala = altura / altura_actual
@@ -221,7 +206,6 @@ def resize_selfie(selfie_path):
 # and uses the crop_information function to extract information from various regions of interest in the image
 # receives as parameters an image
 # returns all the results of the extracted texts
-
 def extract_info_DPI(image_path):
    
    result_dict = {}
