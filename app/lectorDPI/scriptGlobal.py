@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 load_dotenv() # load the .env file 
 base_path = os.getenv('PATH_INFO')
 
-
 roi = [
         [(24, 164), (327, 215), 'text', 'cui'], 
         [(350, 167), (650, 242), 'text', 'name'], 
@@ -17,17 +16,17 @@ roi = [
         [(350, 470), (502, 505), 'text', 'fech'], 
         [(550, 355), (630, 390), 'text', 'pais'], 
         [(700, 208), (996, 587), 'img', 'photo'],
-        [(294, 524), (543, 602), 'img', 'firm'] 
    ]
 
 per = 25
+pixelThreshold = 800
 template_image = os.path.join(base_path, 'app/lectorDPI/plantilla.png')
 imgQ = cv2.imread(template_image)
 h,w,c = imgQ.shape
-points = 0.1
+points = 0.01
 num_keypoints = int(h * w * points)
 
-orb = cv2.ORB_create(6000)
+orb = cv2.ORB_create(5000)
 kp1, des1 = orb.detectAndCompute(imgQ,None)
 # impKp1 = cv2.drawKeypoints(imgQ, kp1, None)
 
@@ -37,8 +36,7 @@ print(myPiclist)
 
 for j,y in enumerate(myPiclist):
     img = cv2.imread(path_files + "/" + y)
-    # img = cv2.resize(img, (w//3,h//3))
-    # cv2.imshow(y,img)
+
     kp2, des2 = orb.detectAndCompute(img,None)
     bf = cv2.BFMatcher(cv2.NORM_HAMMING)
     matches = bf.match(des2,des1)
@@ -58,17 +56,30 @@ for j,y in enumerate(myPiclist):
     imgShow = imgScan.copy()
     imgMask = np.zeros_like(imgShow)
 
+    myData = []
+
+    print(f'################ Extracting data from form {j} ##################')
+
     for x,r in enumerate(roi):
         cv2.rectangle(imgMask, (r[0][0],r[0][1]),(r[1][0],r[1][1]),(0,255,0),cv2.FILLED)
         imgShow = cv2.addWeighted(imgShow,0.99,imgMask,0.1,0)
 
         imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
-        # cv2.imshow(str(x), imgCrop)
-        # images_cropped.append(imgCrop)
-        # positions_x.append(x)
+        
+        if r[2] == 'text':
+            print('{} :{}'.format(r[3], pytesseract.image_to_string(imgCrop)))
+            myData.append(pytesseract.image_to_string(imgCrop))
+        if r[3] == 'img':
+            imgGray = cv2.cvtColor(imgCrop, cv2.COLOR_BGR2GRAY)
+            imgThresh = cv2.threshold(imgGray, 170,255,cv2.THRESH_BINARY_INV)[1]
+            totalPixels = cv2.countNonZero(imgThresh)
+            if totalPixels>pixelThreshold: totalPixels =1;
+            else: totalPixels=0
+            print(f'{r[3]} :{totalPixels}')
+            myData.append(totalPixels)
 
-    imgShow = cv2.resize(imgShow, (w // 2, h // 2))
-    cv2.imshow(y+"2", imgShow)
+print(myData)
+cv2.imshow(y+"2", imgShow)
 
 # cv2.imshow("keyPontsQuery", impKp1)
 cv2.waitKey(0)
