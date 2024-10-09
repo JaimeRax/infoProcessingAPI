@@ -61,12 +61,15 @@ for j,y in enumerate(myPiclist):
     for x,r in enumerate(roi):
         cv2.rectangle(imgMask, (r[0][0],r[0][1]),(r[1][0],r[1][1]),(0,255,0),cv2.FILLED)
         imgShow = cv2.addWeighted(imgShow,0.99,imgMask,0.1,0)
-        # imgCrop = imgscan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
+
+        imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
+        # cv2.imshow(str(x), imgCrop)
         # images_cropped.append(imgCrop)
         # positions_x.append(x)
 
     imgShow = cv2.resize(imgShow, (w // 2, h // 2))
     cv2.imshow(y+"2", imgShow)
+
 # cv2.imshow("keyPontsQuery", impKp1)
 cv2.waitKey(0)
 
