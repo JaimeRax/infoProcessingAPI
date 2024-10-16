@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from app.common.scripts import inicializandoConexion
 from app.lectorDPI.processRequest import save_template_image 
 from app.lectorDPI.processRequest import unzip_file 
+from app.lectorDPI.processRequest import extrain_info 
 import json
 
 # Crear un Blueprint para las rutas 
@@ -28,16 +29,13 @@ def test():
 
     try:
         roi_array = request.form['roi_array']
-        roi_array = json.loads(roi_array)
+        # roi_array = json.loads(roi_array)
 
         # Guardar la imagen de plantilla
         template_filename = save_template_image(template_image)
-
-        # Descomprimir el archivo ZIP y obtener los nombres de los archivos
         extracted_files = unzip_file(zip_file)
+        extrain_data = extrain_info(roi_array)
         
-        print("Array recibido (ROI):", roi_array)
-
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -45,6 +43,7 @@ def test():
         'template_image': template_filename,
         'extracted_files': extracted_files,
         'roi_array': roi_array,
+        'data': extrain_data,
         'message': 'Imagen y archivos ZIP procesados correctamente.'
     })
 
