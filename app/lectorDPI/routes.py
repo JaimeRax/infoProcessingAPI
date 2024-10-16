@@ -32,7 +32,6 @@ def test():
         roi_array = request.form['roi_array']
         template_filename = save_template_image(template_image)
         extracted_files = unzip_file(zip_file)
-
         extrain_data = extrain_info(roi_array, template_filename, extracted_files)
         
     except Exception as e:
@@ -55,39 +54,3 @@ def test():
 #     return jsonify({'resultExtrain': results})
 
 
-# @lectorDPI.route('/extrain_info', methods=['POST'])
-# def extrain_info():
-#     # Obtener parámetros de la solicitud POST
-#     # 1. image_path como parámetro en JSON
-#     data = request.json
-#     image_path = data.get('image_path')
-#
-#     # 2. Recibir el archivo ZIP
-#     if 'file' not in request.files:
-#         return jsonify({'error': 'No file part'}), 400
-#     file = request.files['file']
-#
-#     # 3. Recibir el array como parte de la solicitud JSON
-#     data_array = data.get('data_array', [])
-#
-#     # Verificar que el archivo sea un ZIP
-#     if file.filename == '' or not file.filename.endswith('.zip'):
-#         return jsonify({'error': 'Invalid file type. Only ZIP files are allowed.'}), 400
-#
-#     # Descomprimir el archivo ZIP
-#     zip_path = '/tmp/uploaded.zip'  # Ruta temporal para guardar el archivo
-#     file.save(zip_path)
-#     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-#         zip_ref.extractall('/tmp/unzipped')  # Directorio temporal para los archivos extraídos
-#
-#     # Procesar la imagen (usar el image_path recibido)
-#     results = extract_info_DPI(image_path)
-#     results = results.replace('\n', ' ')
-#
-#     # Realizar las operaciones que necesites con el array
-#     # Por ejemplo, puedes iterar sobre el array y hacer algo con cada elemento.
-#     for item in data_array:
-#         # Procesar cada elemento
-#         print(f"Procesando item: {item}")
-#
-#     return jsonify({'resultExtrain': results, 'processed_array': data_array})

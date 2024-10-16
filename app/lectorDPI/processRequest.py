@@ -44,12 +44,10 @@ def unzip_file(zip_file):
     
     return path_dir
 
-def extrain_info(roi_array, path_template, path_directory):
 
+def extrain_info(roi_array, path_template, path_directory):
     load_dotenv() # load the .env file 
     base_path = os.getenv('PATH_INFO')
-
-    roi = roi_array;
 
     points = 0.01
     pixelThreshold = 800
@@ -60,19 +58,16 @@ def extrain_info(roi_array, path_template, path_directory):
     h,w,c = imgQ.shape
     num_keypoints = int(h * w * points)
 
-    orb = cv2.ORB_create(5000)
+    orb = cv2.ORB_create(num_keypoints)
     kp1, des1 = orb.detectAndCompute(imgQ,None)
     impKp1 = cv2.drawKeypoints(imgQ, kp1, None)
 
     # read directory of files
     path_files = os.path.join(base_path, path_directory)
-    print(path_files)
     myPiclist = os.listdir(path_files)
 
     for j,y in enumerate(myPiclist):
         img = cv2.imread(path_files + "/" + y)
-
-        print(img)
         kp2, des2 = orb.detectAndCompute(img,None)
         bf = cv2.BFMatcher(cv2.NORM_HAMMING)
         matches = bf.match(des2,des1)
@@ -90,26 +85,30 @@ def extrain_info(roi_array, path_template, path_directory):
         imgShow = imgScan.copy()
         imgMask = np.zeros_like(imgShow)
 
+        images_cropped = []  
+        positions_x = []
         myData = []
 
-        print(f'################ Extracting data from form {j} ##################')
+        for r in roi_array:
+        # for x,r in enumerate(roi_array):
+            if len(r) >= 4:
+                cv2.rectangle(imgMask, (r[0][0],r[0][1]),(r[1][0],r[1][1]),(0,255,0),cv2.FILLED)
+                imgShow = cv2.addWeighted(imgShow,0.99,imgMask,0.1,0)
+                imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
+                images_cropped.append(imgCrop)
+                # positions_x.append(x)
+                if r[2] == 'text':
+                    print('{} :{}'.format(r[3], pytesseract.image_to_string(imgCrop)))
+                    myData.append(pytesseract.image_to_string(imgCrop))
+                if r[3] == 'img':
+                    imgGray = cv2.cvtColor(imgCrop, cv2.COLOR_BGR2GRAY)
+                    imgThresh = cv2.threshold(imgGray, 170,255,cv2.THRESH_BINARY_INV)[1]
+                    totalPixels = cv2.countNonZero(imgThresh)
+                    if totalPixels>pixelThreshold: totalPixels =1;
+                    else: totalPixels=0
+                    print(f'{r[3]} :{totalPixels}')
+                    myData.append(totalPixels)
+    return myData
 
-        for x,r in enumerate(roi):
-            cv2.rectangle(imgMask, (r[0][0],r[0][1]),(r[1][0],r[1][1]),(0,255,0),cv2.FILLED)
-            imgShow = cv2.addWeighted(imgShow,0.99,imgMask,0.1,0)
-            imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
 
-            if r[2] == 'text':
-                print('{} :{}'.format(r[3], pytesseract.image_to_string(imgCrop)))
-                myData.append(pytesseract.image_to_string(imgCrop))
-            if r[3] == 'img':
-                imgGray = cv2.cvtColor(imgCrop, cv2.COLOR_BGR2GRAY)
-                imgThresh = cv2.threshold(imgGray, 170,255,cv2.THRESH_BINARY_INV)[1]
-                totalPixels = cv2.countNonZero(imgThresh)
-                if totalPixels>pixelThreshold: totalPixels =1;
-                else: totalPixels=0
-                print(f'{r[3]} :{totalPixels}')
-                myData.append(totalPixels)
-
-    return myPiclist
 
