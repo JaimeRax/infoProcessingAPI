@@ -1,24 +1,24 @@
-#Librerias
 from flask import Blueprint, jsonify, request
 from app.common.scripts import inicializandoConexion
 from app.lectorDPI.processRequest import save_template_image 
 from app.lectorDPI.processRequest import unzip_file 
+import json
 
 # Crear un Blueprint para las rutas 
 lectorDPI = Blueprint('lectorDPI', __name__)
 
-#Ruta principal
+# route principal
 @lectorDPI.route('/')
 def index():
     msg = inicializandoConexion()
     return jsonify({'msg': msg})
 
 
+# route to testing
 @lectorDPI.route('/test')
 def test():
-    # Comprobar si se enviaron ambos archivos (imagen y ZIP)
-    if 'template_image' not in request.files or 'zip_file' not in request.files:
-        return jsonify({'error': 'Faltan archivos. Se requieren template_image y zip_file.'}), 400
+    if 'template_image' not in request.files or 'zip_file' not in request.files or 'roi_array' not in request.form:
+        return jsonify({'error': 'Faltan archivos. Se requieren template_image y zip_file y roi_array.'}), 400
     
     template_image = request.files['template_image']
     zip_file = request.files['zip_file']
@@ -27,18 +27,24 @@ def test():
         return jsonify({'error': 'Uno o ambos archivos no fueron seleccionados.'}), 400
 
     try:
+        roi_array = request.form['roi_array']
+        roi_array = json.loads(roi_array)
+
         # Guardar la imagen de plantilla
         template_filename = save_template_image(template_image)
 
         # Descomprimir el archivo ZIP y obtener los nombres de los archivos
         extracted_files = unzip_file(zip_file)
         
+        print("Array recibido (ROI):", roi_array)
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
     return jsonify({
         'template_image': template_filename,
         'extracted_files': extracted_files,
+        'roi_array': roi_array,
         'message': 'Imagen y archivos ZIP procesados correctamente.'
     })
 
