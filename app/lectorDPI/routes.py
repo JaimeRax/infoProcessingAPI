@@ -28,23 +28,20 @@ def test():
         return jsonify({'error': 'Uno o ambos archivos no fueron seleccionados.'}), 400
 
     try:
-        roi_array = request.form['roi_array']
-        # roi_array = json.loads(roi_array)
 
-        # Guardar la imagen de plantilla
+        roi_array = request.form['roi_array']
         template_filename = save_template_image(template_image)
         extracted_files = unzip_file(zip_file)
-        extrain_data = extrain_info(roi_array)
+
+        extrain_data = extrain_info(roi_array, template_filename, extracted_files)
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
     return jsonify({
-        'template_image': template_filename,
-        'extracted_files': extracted_files,
-        'roi_array': roi_array,
         'data': extrain_data,
-        'message': 'Imagen y archivos ZIP procesados correctamente.'
+        'template': template_filename,
+        'directory': extracted_files
     })
 
 
