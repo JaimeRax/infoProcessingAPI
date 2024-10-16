@@ -1,15 +1,11 @@
 #Librerias
-from flask import Blueprint, jsonify, request, send_file, redirect, url_for
+from flask import Blueprint, jsonify, request
 from app.common.scripts import inicializandoConexion
-from app.lectorDPI.scripts import extract_info_DPI
-from app.lectorDPI.scripts import crop_photo
-from app.lectorDPI.scripts import resize_selfie
-import json, os
+from app.lectorDPI.processRequest import save_template_image 
+from app.lectorDPI.processRequest import unzip_file 
 
-
-# Crear un Blueprint para las rutas relacionadas con los usuarios
+# Crear un Blueprint para las rutas 
 lectorDPI = Blueprint('lectorDPI', __name__)
-
 
 #Ruta principal
 @lectorDPI.route('/')
@@ -18,18 +14,78 @@ def index():
     return jsonify({'msg': msg})
 
 
+@lectorDPI.route('/test')
+def test():
+    # Comprobar si se enviaron ambos archivos (imagen y ZIP)
+    if 'template_image' not in request.files or 'zip_file' not in request.files:
+        return jsonify({'error': 'Faltan archivos. Se requieren template_image y zip_file.'}), 400
+    
+    template_image = request.files['template_image']
+    zip_file = request.files['zip_file']
+    
+    if template_image.filename == '' or zip_file.filename == '':
+        return jsonify({'error': 'Uno o ambos archivos no fueron seleccionados.'}), 400
+
+    try:
+        # Guardar la imagen de plantilla
+        template_filename = save_template_image(template_image)
+
+        # Descomprimir el archivo ZIP y obtener los nombres de los archivos
+        extracted_files = unzip_file(zip_file)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    return jsonify({
+        'template_image': template_filename,
+        'extracted_files': extracted_files,
+        'message': 'Imagen y archivos ZIP procesados correctamente.'
+    })
+
+
 # http://localhost:5000/api/lectorDPI/extrain_info?image_path=media/chavi.jpeg
-@lectorDPI.route('/extrain_info', methods=['GET'])
-def extrain_info():
-    
-    # image_path = request.args.get('image_path')  
-    # print('Imagen Name: ', image_path)
-    # STORAGE_ROUTE_BD = os.environ['STORAGE_ROUTE_BD']  #path for images from the database
-    
-    # image_path = f"{STORAGE_ROUTE_BD}{image_path}"
-    image_path = '/home/jaime/Documents/university/infoProcessingAPI/media/chavi.png'
-    results = extract_info_DPI(image_path)
-    results = results.replace('\n', ' ')
+# @lectorDPI.route('/extrain_info', methods=['GET'])
+# def extrain_info():
+#     image_path = '/home/jaime/Documents/university/infoProcessingAPI/media/chavi.png'
+#     results = extract_info_DPI(image_path)
+#     results = results.replace('\n', ' ')
+#
+#     return jsonify({'resultExtrain': results})
 
-    return jsonify({'resultExtrain': results})
 
+# @lectorDPI.route('/extrain_info', methods=['POST'])
+# def extrain_info():
+#     # Obtener parámetros de la solicitud POST
+#     # 1. image_path como parámetro en JSON
+#     data = request.json
+#     image_path = data.get('image_path')
+#
+#     # 2. Recibir el archivo ZIP
+#     if 'file' not in request.files:
+#         return jsonify({'error': 'No file part'}), 400
+#     file = request.files['file']
+#
+#     # 3. Recibir el array como parte de la solicitud JSON
+#     data_array = data.get('data_array', [])
+#
+#     # Verificar que el archivo sea un ZIP
+#     if file.filename == '' or not file.filename.endswith('.zip'):
+#         return jsonify({'error': 'Invalid file type. Only ZIP files are allowed.'}), 400
+#
+#     # Descomprimir el archivo ZIP
+#     zip_path = '/tmp/uploaded.zip'  # Ruta temporal para guardar el archivo
+#     file.save(zip_path)
+#     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+#         zip_ref.extractall('/tmp/unzipped')  # Directorio temporal para los archivos extraídos
+#
+#     # Procesar la imagen (usar el image_path recibido)
+#     results = extract_info_DPI(image_path)
+#     results = results.replace('\n', ' ')
+#
+#     # Realizar las operaciones que necesites con el array
+#     # Por ejemplo, puedes iterar sobre el array y hacer algo con cada elemento.
+#     for item in data_array:
+#         # Procesar cada elemento
+#         print(f"Procesando item: {item}")
+#
+#     return jsonify({'resultExtrain': results, 'processed_array': data_array})
