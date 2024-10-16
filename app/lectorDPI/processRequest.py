@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 import pytesseract
 import numpy as np
 import zipfile
+import shutil
+import ast
 import cv2
 import os
 
@@ -18,6 +20,7 @@ def save_template_image(template_image):
     template_image.save(image_path)
 
     return image_path
+
 
 
 # Función para descomprimir el archivo ZIP
@@ -44,6 +47,21 @@ def unzip_file(zip_file):
     
     return path_dir
 
+def delete_directories():
+    # Directorios a eliminar
+    directories = ['template/', 'unzipped/']
+    
+    for directory in directories:
+        if os.path.exists(directory):
+            try:
+                # Elimina el directorio y todo su contenido
+                shutil.rmtree(directory)
+                print(f"Eliminado: {directory}")
+            except Exception as e:
+                print(f"Error al eliminar {directory}: {e}")
+        else:
+            print(f"El directorio {directory} no existe.")
+
 
 def extrain_info(roi_array, path_template, path_directory):
     load_dotenv() # load the .env file 
@@ -65,8 +83,10 @@ def extrain_info(roi_array, path_template, path_directory):
     # read directory of files
     path_files = os.path.join(base_path, path_directory)
     myPiclist = os.listdir(path_files)
+    print(myPiclist)
 
     for j,y in enumerate(myPiclist):
+        name = path_files+"/"+y
         img = cv2.imread(path_files + "/" + y)
         kp2, des2 = orb.detectAndCompute(img,None)
         bf = cv2.BFMatcher(cv2.NORM_HAMMING)
@@ -89,14 +109,14 @@ def extrain_info(roi_array, path_template, path_directory):
         positions_x = []
         myData = []
 
+        print(f'################ Extracting data from form {j} ##################')
+
         for r in roi_array:
-        # for x,r in enumerate(roi_array):
             if len(r) >= 4:
                 cv2.rectangle(imgMask, (r[0][0],r[0][1]),(r[1][0],r[1][1]),(0,255,0),cv2.FILLED)
                 imgShow = cv2.addWeighted(imgShow,0.99,imgMask,0.1,0)
                 imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
-                images_cropped.append(imgCrop)
-                # positions_x.append(x)
+                
                 if r[2] == 'text':
                     print('{} :{}'.format(r[3], pytesseract.image_to_string(imgCrop)))
                     myData.append(pytesseract.image_to_string(imgCrop))
@@ -108,6 +128,8 @@ def extrain_info(roi_array, path_template, path_directory):
                     else: totalPixels=0
                     print(f'{r[3]} :{totalPixels}')
                     myData.append(totalPixels)
+
+        
     return myData
 
 

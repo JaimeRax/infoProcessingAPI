@@ -3,7 +3,8 @@ from app.common.scripts import inicializandoConexion
 from app.lectorDPI.processRequest import save_template_image 
 from app.lectorDPI.processRequest import unzip_file 
 from app.lectorDPI.processRequest import extrain_info 
-import json
+from app.lectorDPI.processRequest import delete_directories
+import ast
 
 # Crear un Blueprint para las rutas 
 lectorDPI = Blueprint('lectorDPI', __name__)
@@ -30,10 +31,12 @@ def test():
     try:
 
         roi_array = request.form['roi_array']
+        roi = ast.literal_eval(roi_array)
         template_filename = save_template_image(template_image)
         extracted_files = unzip_file(zip_file)
-        extrain_data = extrain_info(roi_array, template_filename, extracted_files)
-        
+        extrain_data = extrain_info(roi, template_filename, extracted_files)
+        # delete_directories()
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
