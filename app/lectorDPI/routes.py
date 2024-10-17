@@ -40,5 +40,5 @@ def test():
         return jsonify({'error': str(e)}), 500
 
     return jsonify({
-        'data': extrain_data,
+        'information': extrain_data,
     })

@@ -7,7 +7,7 @@ import shutil
 import cv2
 import os
 
-# Funcion para guardar la imagen de plantilla
+# function to save the template
 def save_template_image(template_image):
     upload_folder = 'template/'
     if not os.path.exists(upload_folder):
@@ -20,11 +20,10 @@ def save_template_image(template_image):
     return image_path
 
 
-
-# Funcion para descomprimir el archivo ZIP
+# function to unzip the zip file
 def unzip_file(zip_file):
     unzip_folder = 'unzipped/'
-    zip_name = os.path.splitext(secure_filename(zip_file.filename))[0]  # Obtener nombre sin extension
+    zip_name = os.path.splitext(secure_filename(zip_file.filename))[0]  # obtain name
     extract_folder = os.path.join(unzip_folder, zip_name)
 
     if not os.path.exists(extract_folder):
@@ -33,7 +32,7 @@ def unzip_file(zip_file):
     zip_path = os.path.join(unzip_folder, secure_filename(zip_file.filename))
     zip_file.save(zip_path)
     
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref: # Descomprimir el archivo
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref: # unzip the file 
         for member in zip_ref.namelist():
             if not member.endswith('/'):
                 zip_ref.extract(member, unzip_folder)
@@ -42,15 +41,14 @@ def unzip_file(zip_file):
     
     return path_dir
 
-
-
+# function to delete directories
 def delete_directories():
-    directories = ['template/', 'unzipped/'] # Directorios a eliminar
+    directories = ['template/', 'unzipped/', 'cropImage/'] 
     
     for directory in directories:
         if os.path.exists(directory):
             try:
-                shutil.rmtree(directory) # Elimina el directorio y todo su contenido
+                shutil.rmtree(directory) 
                 print(f"Eliminado: {directory}")
             except Exception as e:
                 print(f"Error al eliminar {directory}: {e}")
@@ -59,6 +57,7 @@ def delete_directories():
 
 
 
+# Main function for processing and cropping the images 
 def extrain_info(roi_array, path_template, path_directory):
     output_dir = "cropImage"
     if not os.path.exists(output_dir):
@@ -67,13 +66,12 @@ def extrain_info(roi_array, path_template, path_directory):
     load_dotenv() # load the .env file 
     base_path = os.getenv('PATH_INFO')
 
-    points = 0.01
     template_image = os.path.join(base_path, path_template)
 
     imgQ = cv2.imread(template_image)
     per = 25
     h,w,c = imgQ.shape
-    num_keypoints = int(h * w * points)
+    num_keypoints = int(h * w * 0.01)
 
     orb = cv2.ORB_create(num_keypoints)
     kp1, des1 = orb.detectAndCompute(imgQ,None)
@@ -87,6 +85,13 @@ def extrain_info(roi_array, path_template, path_directory):
 
     for j,y in enumerate(myPiclist):
         img = cv2.imread(path_files + "/" + y)
+
+        scale_percent = 65  
+        width = int(img.shape[1] * scale_percent / 100)
+        height = int(img.shape[0] * scale_percent / 100)
+        dim = (width, height)
+        img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+
         kp2, des2 = orb.detectAndCompute(img,None)
         bf = cv2.BFMatcher(cv2.NORM_HAMMING)
         matches = bf.match(des2,des1)
@@ -125,28 +130,26 @@ def extrain_info(roi_array, path_template, path_directory):
                     cv2.imwrite(output_path, imgCrop)
 
         all_extracted_data[f'img{j+1}'] = extracted_texts
-        
+
     return all_extracted_data
 
 
-
+# function to extract the data
 def get_best_text(cropped_image):
     aux_texts = []
     gray_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
 
     for threshold_value in range(50,220,10):
-        _, thresholded_img = cv2.threshold(gray_image, threshold_value, 255, cv2.THRESH_BINARY) # Aplicar umbral
+        _, thresholded_img = cv2.threshold(gray_image, threshold_value, 255, cv2.THRESH_BINARY) # use umbral
 
         text = pytesseract.image_to_string(thresholded_img, config=f"--psm 6 -l spa")
 
-        # Añadir texto extraído a la lista si no está vacío
+        # add text in the list
         if text.strip():
             aux_texts.append(text.strip())
 
     if aux_texts:
-        best_text = max(aux_texts, key=aux_texts.count)  # El texto mas frecuente
-        return best_text.replace('\n', ' ')  # Devolvemos el texto sin saltos de linea
+        best_text = max(aux_texts, key=aux_texts.count)  
+        return best_text.replace('\n', ' ')  # return text
     else:
-        return ""  # En caso de que no se extraiga ningun texto
-
-
+        return ""  
