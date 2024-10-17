@@ -65,11 +65,9 @@ def extrain_info_single(roi_array, path_template):
 
             # save image in 'cropImage'
             if r[2] == 'img':
-                output_path = os.path.join(output_dir, f'{r[3]}')  
+                output_path = os.path.join(output_dir, "imageCrop.png")  
                 cv2.imwrite(output_path, imgCrop)
 
-    all_extracted_data[f'img{1}'] = extracted_texts
+    all_extracted_data["img"] = extracted_texts
 
     return all_extracted_data
-
-
