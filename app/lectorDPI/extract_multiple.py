@@ -6,7 +6,7 @@ import os
 
 
 # Main function for processing and cropping the images 
-def extrain_info(roi_array, path_template, path_directory):
+def extrain_info_multiple(roi_array, path_template, path_directory):
     output_dir = "cropImage"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)

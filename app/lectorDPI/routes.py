@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify, request
 from app.common.scripts import inicializandoConexion
 from app.lectorDPI.processRequest import save_template_image 
 from app.lectorDPI.processRequest import unzip_file 
-from app.lectorDPI.processRequest import extrain_info 
+from app.lectorDPI.extract_multiple import extrain_info_multiple 
+from app.lectorDPI.extract_single import extrain_info_single 
 from app.lectorDPI.processRequest import delete_directories
 import ast
 
@@ -33,7 +34,7 @@ def test():
         roi = ast.literal_eval(roi_array)
         template_filename = save_template_image(template_image)
         extracted_files = unzip_file(zip_file)
-        extrain_data = extrain_info(roi, template_filename, extracted_files)
+        extrain_data = extrain_info_multiple(roi, template_filename, extracted_files)
         # delete_directories()
 
     except Exception as e:

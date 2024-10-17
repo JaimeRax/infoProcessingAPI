@@ -51,5 +51,3 @@ def delete_directories():
                 print(f"Error al eliminar {directory}: {e}")
         else:
             print(f"El directorio {directory} no existe.")
-
-
