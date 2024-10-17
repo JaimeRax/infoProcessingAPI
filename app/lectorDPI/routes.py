@@ -25,8 +25,8 @@ def test():
     template_image = request.files['template_image']
     zip_file = request.files['zip_file']
     
-    if template_image.filename == '' or zip_file.filename == '':
-        return jsonify({'error': 'Uno o ambos archivos no fueron seleccionados.'}), 400
+    if template_image.filename == '' or zip_file.filename == '' or roi_array.filename == '':
+        return jsonify({'error': 'Uno o mas archivos no fueron seleccionados.'}), 400
 
     try:
         roi_array = request.form['roi_array']
