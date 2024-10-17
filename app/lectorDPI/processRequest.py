@@ -68,7 +68,6 @@ def extrain_info(roi_array, path_template, path_directory):
     base_path = os.getenv('PATH_INFO')
 
     points = 0.01
-    pixelThreshold = 800
     template_image = os.path.join(base_path, path_template)
 
     imgQ = cv2.imread(template_image)
@@ -84,7 +83,7 @@ def extrain_info(roi_array, path_template, path_directory):
     myPiclist = os.listdir(path_files)
     print(myPiclist)
 
-    all_extracted_data = []
+    all_extracted_data = {}
 
     for j,y in enumerate(myPiclist):
         img = cv2.imread(path_files + "/" + y)
@@ -103,27 +102,29 @@ def extrain_info(roi_array, path_template, path_directory):
 
         imgShow = imgScan.copy()
         imgMask = np.zeros_like(imgShow)
-        myData = []
+        extracted_texts = {}
 
         print(f'################ Extracting data from form {j} ##################')
 
         for x,r in enumerate(roi_array):
-            cv2.rectangle(imgMask, (r[0][0],r[0][1]),(r[1][0],r[1][1]),(0,255,0),cv2.FILLED)
-            imgShow = cv2.addWeighted(imgShow, 0.99, imgMask,0.1,0)
+            if isinstance(r, (list, tuple)):
+                cv2.rectangle(imgMask, (r[0][0],r[0][1]),(r[1][0],r[1][1]),(0,255,0),cv2.FILLED)
+                imgShow = cv2.addWeighted(imgShow, 0.99, imgMask, 0.1, 0)
 
-            # crop to image with roi
-            imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
+                # crop to image with roi
+                imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
 
-            # extrain data of the image
-            if r[2] == 'text':
-                best_text = get_best_text(imgCrop)
-                myData.append(best_text)
+                # extrain data of the image
+                if r[2] == 'text':
+                    best_text = get_best_text(imgCrop)
+                    extracted_texts[r[3]] = best_text
 
-            # save image in 'cropImage'
-            if r[2] == 'img':
-                output_path = os.path.join(output_dir, f'{y}')  
-                cv2.imwrite(output_path, imgCrop)
-        all_extracted_data.extend(myData)
+                # save image in 'cropImage'
+                if r[2] == 'img':
+                    output_path = os.path.join(output_dir, f'{y}')  
+                    cv2.imwrite(output_path, imgCrop)
+
+        all_extracted_data[f'img{j+1}'] = extracted_texts
         
     return all_extracted_data
 
