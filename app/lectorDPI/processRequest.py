@@ -4,17 +4,15 @@ import pytesseract
 import numpy as np
 import zipfile
 import shutil
-import ast
 import cv2
 import os
 
-# Función para guardar la imagen de plantilla
+# Funcion para guardar la imagen de plantilla
 def save_template_image(template_image):
     upload_folder = 'template/'
     if not os.path.exists(upload_folder):
         os.makedirs(upload_folder)
 
-    # Obtener el nombre seguro del archivo
     filename = secure_filename(template_image.filename)
     image_path = os.path.join(upload_folder, filename)
     template_image.save(image_path)
@@ -23,10 +21,10 @@ def save_template_image(template_image):
 
 
 
-# Función para descomprimir el archivo ZIP
+# Funcion para descomprimir el archivo ZIP
 def unzip_file(zip_file):
     unzip_folder = 'unzipped/'
-    zip_name = os.path.splitext(secure_filename(zip_file.filename))[0]  # Obtener nombre sin extensión
+    zip_name = os.path.splitext(secure_filename(zip_file.filename))[0]  # Obtener nombre sin extension
     extract_folder = os.path.join(unzip_folder, zip_name)
 
     if not os.path.exists(extract_folder):
@@ -35,27 +33,24 @@ def unzip_file(zip_file):
     zip_path = os.path.join(unzip_folder, secure_filename(zip_file.filename))
     zip_file.save(zip_path)
     
-    # Descomprimir el archivo
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        # Extraer los archivos sin incluir rutas internas adicionales
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref: # Descomprimir el archivo
         for member in zip_ref.namelist():
             if not member.endswith('/'):
                 zip_ref.extract(member, unzip_folder)
 
         path_dir = unzip_folder+zip_name
-        # extracted_files = os.listdir(path_dir)
     
     return path_dir
 
+
+
 def delete_directories():
-    # Directorios a eliminar
-    directories = ['template/', 'unzipped/']
+    directories = ['template/', 'unzipped/'] # Directorios a eliminar
     
     for directory in directories:
         if os.path.exists(directory):
             try:
-                # Elimina el directorio y todo su contenido
-                shutil.rmtree(directory)
+                shutil.rmtree(directory) # Elimina el directorio y todo su contenido
                 print(f"Eliminado: {directory}")
             except Exception as e:
                 print(f"Error al eliminar {directory}: {e}")
@@ -63,7 +58,12 @@ def delete_directories():
             print(f"El directorio {directory} no existe.")
 
 
+
 def extrain_info(roi_array, path_template, path_directory):
+    output_dir = "cropImage"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     load_dotenv() # load the .env file 
     base_path = os.getenv('PATH_INFO')
 
@@ -78,7 +78,6 @@ def extrain_info(roi_array, path_template, path_directory):
 
     orb = cv2.ORB_create(num_keypoints)
     kp1, des1 = orb.detectAndCompute(imgQ,None)
-    impKp1 = cv2.drawKeypoints(imgQ, kp1, None)
 
     # read directory of files
     path_files = os.path.join(base_path, path_directory)
@@ -86,7 +85,6 @@ def extrain_info(roi_array, path_template, path_directory):
     print(myPiclist)
 
     for j,y in enumerate(myPiclist):
-        name = path_files+"/"+y
         img = cv2.imread(path_files + "/" + y)
         kp2, des2 = orb.detectAndCompute(img,None)
         bf = cv2.BFMatcher(cv2.NORM_HAMMING)
@@ -94,7 +92,6 @@ def extrain_info(roi_array, path_template, path_directory):
         matches = list(matches)
         matches.sort(key=lambda x: x.distance)
         good = matches[:int(len(matches)*(per/100))]
-        imgMatch = cv2.drawMatches(img,kp2,imgQ,kp1,good[:400],None,flags=2)
 
         srcPoints = np.float32([kp2[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
         dstPoints = np.float32([kp1[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
@@ -111,24 +108,23 @@ def extrain_info(roi_array, path_template, path_directory):
 
         print(f'################ Extracting data from form {j} ##################')
 
-        for r in roi_array:
-            if len(r) >= 4:
-                cv2.rectangle(imgMask, (r[0][0],r[0][1]),(r[1][0],r[1][1]),(0,255,0),cv2.FILLED)
-                imgShow = cv2.addWeighted(imgShow,0.99,imgMask,0.1,0)
-                imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
-                
-                if r[2] == 'text':
-                    print('{} :{}'.format(r[3], pytesseract.image_to_string(imgCrop)))
-                    myData.append(pytesseract.image_to_string(imgCrop))
-                if r[3] == 'img':
-                    imgGray = cv2.cvtColor(imgCrop, cv2.COLOR_BGR2GRAY)
-                    imgThresh = cv2.threshold(imgGray, 170,255,cv2.THRESH_BINARY_INV)[1]
-                    totalPixels = cv2.countNonZero(imgThresh)
-                    if totalPixels>pixelThreshold: totalPixels =1;
-                    else: totalPixels=0
-                    print(f'{r[3]} :{totalPixels}')
-                    myData.append(totalPixels)
+        for x,r in enumerate(roi_array):
+            cv2.rectangle(imgMask, (r[0][0],r[0][1]),(r[1][0],r[1][1]),(0,255,0),cv2.FILLED)
+            imgShow = cv2.addWeighted(imgShow, 0.99, imgMask,0.1,0)
 
+            # crop to image with roi
+            imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
+            images_cropped.append(imgCrop)
+            positions_x.append(x)
+
+            if r[2] == 'text':
+                print('{} :{}'.format(r[3], pytesseract.image_to_string(imgCrop)))
+                myData.append(pytesseract.image_to_string(imgCrop))
+
+            if r[2] == 'img':
+                # save image in 'cropImage'
+                output_path = os.path.join(output_dir, f'{y}')  
+                cv2.imwrite(output_path, imgCrop)
         
     return myData
 
