@@ -29,7 +29,6 @@ def test():
         return jsonify({'error': 'Uno o ambos archivos no fueron seleccionados.'}), 400
 
     try:
-
         roi_array = request.form['roi_array']
         roi = ast.literal_eval(roi_array)
         template_filename = save_template_image(template_image)
@@ -42,18 +41,4 @@ def test():
 
     return jsonify({
         'data': extrain_data,
-        'template': template_filename,
-        'directory': extracted_files
     })
-
-
-# http://localhost:5000/api/lectorDPI/extrain_info?image_path=media/chavi.jpeg
-# @lectorDPI.route('/extrain_info', methods=['GET'])
-# def extrain_info():
-#     image_path = '/home/jaime/Documents/university/infoProcessingAPI/media/chavi.png'
-#     results = extract_info_DPI(image_path)
-#     results = results.replace('\n', ' ')
-#
-#     return jsonify({'resultExtrain': results})
-
-

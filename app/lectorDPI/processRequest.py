@@ -84,6 +84,8 @@ def extrain_info(roi_array, path_template, path_directory):
     myPiclist = os.listdir(path_files)
     print(myPiclist)
 
+    all_extracted_data = []
+
     for j,y in enumerate(myPiclist):
         img = cv2.imread(path_files + "/" + y)
         kp2, des2 = orb.detectAndCompute(img,None)
@@ -101,9 +103,6 @@ def extrain_info(roi_array, path_template, path_directory):
 
         imgShow = imgScan.copy()
         imgMask = np.zeros_like(imgShow)
-
-        images_cropped = []  
-        positions_x = []
         myData = []
 
         print(f'################ Extracting data from form {j} ##################')
@@ -114,19 +113,39 @@ def extrain_info(roi_array, path_template, path_directory):
 
             # crop to image with roi
             imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
-            images_cropped.append(imgCrop)
-            positions_x.append(x)
 
+            # extrain data of the image
             if r[2] == 'text':
-                print('{} :{}'.format(r[3], pytesseract.image_to_string(imgCrop)))
-                myData.append(pytesseract.image_to_string(imgCrop))
+                best_text = get_best_text(imgCrop)
+                myData.append(best_text)
 
+            # save image in 'cropImage'
             if r[2] == 'img':
-                # save image in 'cropImage'
                 output_path = os.path.join(output_dir, f'{y}')  
                 cv2.imwrite(output_path, imgCrop)
+        all_extracted_data.extend(myData)
         
-    return myData
+    return all_extracted_data
 
+
+
+def get_best_text(cropped_image):
+    aux_texts = []
+    gray_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
+
+    for threshold_value in range(50,220,10):
+        _, thresholded_img = cv2.threshold(gray_image, threshold_value, 255, cv2.THRESH_BINARY) # Aplicar umbral
+
+        text = pytesseract.image_to_string(thresholded_img, config=f"--psm 6 -l spa")
+
+        # Añadir texto extraído a la lista si no está vacío
+        if text.strip():
+            aux_texts.append(text.strip())
+
+    if aux_texts:
+        best_text = max(aux_texts, key=aux_texts.count)  # El texto mas frecuente
+        return best_text.replace('\n', ' ')  # Devolvemos el texto sin saltos de linea
+    else:
+        return ""  # En caso de que no se extraiga ningun texto
 
 
