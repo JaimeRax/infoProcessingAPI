@@ -3,10 +3,13 @@ from dotenv import load_dotenv
 import numpy as np
 import cv2
 import os
+from datetime import datetime
+from sqlalchemy import text as sql_text
+from app.common.scripts import inicializandoConexion
 
 
 # Main function for processing and cropping the images 
-def extrain_info_single(roi_array, path_template):
+def extrain_info_single(roi_array, path_template, template_id):
     output_dir = "cropImage"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -57,16 +60,44 @@ def extrain_info_single(roi_array, path_template):
 
             # crop to image with roi
             imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
+                    
+            engine = inicializandoConexion()
+            if engine is None:
+                print("No se pudo establecer conexión con la base de datos.")
+                return None
 
-            # extrain data of the image
-            if r[2] == 'text':
-                best_text = get_best_text(imgCrop)
-                extracted_texts[r[3]] = best_text
+            try:
+                # Insert into the database using raw SQL
+                with engine.connect() as connection:
+                    insert_query = sql_text("""
+                        INSERT INTO roi (roi_x, roi_y, roi_x2, roi_y2, data_type, label, template_id)
+                        VALUES (:roi_x, :roi_y, :roi_x2, :roi_y2, :data_type, :label, :template_id)
+                    """)
+                    connection.execute(insert_query, {
+                        'roi_x': r[0][0],
+                        'roi_y': r[0][1],
+                        'roi_x2': r[1][0],
+                        'roi_y2': r[1][1],
+                        'data_type': r[2],
+                        'label': r[3],
+                        'template_id': template_id
+                    })
+                    connection.commit()  # Commit the transaction
+                    print("Datos insertados correctamente en la tabla 'templates'.")
 
-            # save image in 'cropImage'
-            if r[2] == 'img':
-                output_path = os.path.join(output_dir, "imageCrop.png")  
-                cv2.imwrite(output_path, imgCrop)
+                    # extrain data of the image
+                    if r[2] == 'text':
+                        best_text = get_best_text(imgCrop)
+                        extracted_texts[r[3]] = best_text
+
+                    # save image in 'cropImage'
+                    if r[2] == 'img':
+                        output_path = os.path.join(output_dir, "imageCrop.png")  
+                        cv2.imwrite(output_path, imgCrop)
+
+            except Exception as ex:
+                print(f"Error al insertar los datos: {ex}")
+
 
     all_extracted_data["img"] = extracted_texts
 

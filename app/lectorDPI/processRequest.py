@@ -1,4 +1,8 @@
+from app.common.scripts import inicializandoConexion
 from werkzeug.utils import secure_filename
+from sqlalchemy import text as sql_text  
+from sqlalchemy.orm import Session
+from datetime import datetime
 import zipfile
 import shutil
 import os
@@ -13,8 +17,43 @@ def save_template_image(template_image):
     image_path = os.path.join(upload_folder, filename)
     template_image.save(image_path)
 
-    return image_path
+    # Get current date and time for upload date
+    now = datetime.now()
+    current_date = now.date()  
+    current_time = now.time() 
 
+    # Initialize the DB connection
+    engine = inicializandoConexion()
+    if engine is None:
+        print("No se pudo establecer conexión con la base de datos.")
+        return None
+
+    try:
+        # Insert into the database using raw SQL
+        with engine.connect() as connection:
+            insert_query = sql_text("""
+                INSERT INTO templates(filename, date, time, file_path)
+                VALUES (:filename, :date, :time, :file_path)
+            """)
+            connection.execute(insert_query, {
+                'filename': filename,
+                'date': current_date,
+                'time': current_time,
+                'file_path': image_path
+            })
+
+            template_id_query = sql_text("SELECT LAST_INSERT_ID()")
+            result = connection.execute(template_id_query)
+            template_id = result.scalar()
+
+            connection.commit()  # Commit the transaction
+            print("Datos insertados correctamente en la tabla 'templates'.")
+
+    except Exception as ex:
+        print(f"Error al insertar los datos: {ex}")
+        return None, None
+
+    return image_path, template_id
 
 # function to unzip the zip file
 def unzip_file(zip_file):
@@ -36,7 +75,6 @@ def unzip_file(zip_file):
         path_dir = unzip_folder+zip_name
     
     return path_dir
-
 
 # function to delete directories
 def delete_directories():

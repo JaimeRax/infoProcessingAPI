@@ -60,8 +60,8 @@ def extract_single():
     try:
         roi_array = request.form['roi_array']
         roi = ast.literal_eval(roi_array)
-        template_filename = save_template_image(template_image)
-        extrain_data = extrain_info_single(roi, template_filename)
+        template_filename, template_id = save_template_image(template_image)
+        extrain_data = extrain_info_single(roi, template_filename, template_id)
         # delete_directories()
 
     except Exception as e:
@@ -69,4 +69,24 @@ def extract_single():
 
     return jsonify({
         'information': extrain_data,
+    })
+
+@lectorDPI.route('/test')
+def test():
+    if 'template_image' not in request.files:
+        return jsonify({'error': 'Se requieren template_image'}), 400
+    
+    template_image = request.files['template_image']
+    
+    if template_image.filename == '':
+        return jsonify({'error': 'template_image no fue seleccionado.'}), 400
+
+    try:
+        template_filename, template_id = save_template_image(template_image)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    return jsonify({
+        'information': template_filename,
+        'id': template_id,
     })

@@ -9,8 +9,9 @@ def inicializandoConexion():
 
     try:
         #Se inicia la conexión a la BD
-        conexion = engine.connect()
-        return "Conexión exitosa!"
+        # conexion = engine.connect()
+        return engine
 
     except Exception as ex:
-        return "Error durante la conexión: {}".format(ex)
+        print("Error durante la conexión: {}".format(ex))
+        return None
