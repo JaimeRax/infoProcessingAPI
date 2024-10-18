@@ -32,9 +32,9 @@ def extract_multiple():
     try:
         roi_array = request.form['roi_array']
         roi = ast.literal_eval(roi_array)
-        template_filename = save_template_image(template_image)
+        template_filename, template_id = save_template_image(template_image)
         extracted_files = unzip_file(zip_file)
-        extrain_data = extrain_info_multiple(roi, template_filename, extracted_files)
+        extrain_data = extrain_info_multiple(roi, template_filename, extracted_files, template_id)
         # delete_directories()
 
     except Exception as e:

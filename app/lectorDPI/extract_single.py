@@ -1,11 +1,12 @@
 from app.lectorDPI.extract_data import get_best_text 
-from dotenv import load_dotenv
-import numpy as np
-import cv2
-import os, json
-import datetime, time
-from sqlalchemy import text as sql_text
 from app.common.scripts import inicializandoConexion
+from sqlalchemy import text as sql_text
+from dotenv import load_dotenv
+import datetime, time
+import numpy as np
+import json
+import cv2
+import os
 
 
 # Main function for processing and cropping the images 
@@ -52,7 +53,6 @@ def extrain_info_single(roi_array, path_template, template_id):
     imgMask = np.zeros_like(imgShow)
     extracted_texts = {}
     all_extracted_data = {}
-
     start_time = time.time()
 
     try:
@@ -105,6 +105,12 @@ def extrain_info_single(roi_array, path_template, template_id):
 
             end_time = time.time()
             elapsed_time = end_time - start_time
+            total_seconds = elapsed_time
+            hours, remainder = divmod(total_seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+
+            # Formatear la duracion como HH:MM:SS
+            duration_formatted = f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}"
 
             insert_query = sql_text("""
                 INSERT INTO extractions (extracted_data, date, time, duration, processed_documents, template_id)
@@ -114,16 +120,14 @@ def extrain_info_single(roi_array, path_template, template_id):
                 'extracted_data': json.dumps(extracted_texts),  # Convierte el diccionario de textos extraídos a JSON
                 'date': date,
                 'time': currentTime,
-                'duration': str(elapsed_time),  
+                'duration': duration_formatted,  
                 'processed_documents': 1,
                 'template_id': template_id
             })
             connection.commit()  # Commit the transaction
             print("Datos insertados correctamente en la tabla 'extractions'.")
-
-
+            
     except Exception as ex:
         print(f"Error al insertar los datos: {ex}")
-
 
     return all_extracted_data
