@@ -2,8 +2,8 @@ from app.lectorDPI.extract_data import get_best_text
 from dotenv import load_dotenv
 import numpy as np
 import cv2
-import os
-from datetime import datetime
+import os, json
+import datetime, time
 from sqlalchemy import text as sql_text
 from app.common.scripts import inicializandoConexion
 
@@ -53,22 +53,28 @@ def extrain_info_single(roi_array, path_template, template_id):
     extracted_texts = {}
     all_extracted_data = {}
 
-    for x,r in enumerate(roi_array):
-        if isinstance(r, (list, tuple)):
-            cv2.rectangle(imgMask, (r[0][0],r[0][1]),(r[1][0],r[1][1]),(0,255,0),cv2.FILLED)
-            imgShow = cv2.addWeighted(imgShow, 0.99, imgMask, 0.1, 0)
+    start_time = time.time()
 
-            # crop to image with roi
-            imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
-                    
-            engine = inicializandoConexion()
-            if engine is None:
-                print("No se pudo establecer conexión con la base de datos.")
-                return None
+    try:
+        engine = inicializandoConexion()
+        now = datetime.datetime.now()
+        date = now.date()
+        currentTime = now.time()
 
-            try:
-                # Insert into the database using raw SQL
-                with engine.connect() as connection:
+        if engine is None:
+            print("No se pudo establecer conexión con la base de datos.")
+            return None
+
+        # Insert into the database using raw SQL
+        with engine.connect() as connection:
+            for x,r in enumerate(roi_array):
+                if isinstance(r, (list, tuple)):
+                    cv2.rectangle(imgMask, (r[0][0],r[0][1]),(r[1][0],r[1][1]),(0,255,0),cv2.FILLED)
+                    imgShow = cv2.addWeighted(imgShow, 0.99, imgMask, 0.1, 0)
+
+                    # crop to image with roi
+                    imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
+                            
                     insert_query = sql_text("""
                         INSERT INTO roi (roi_x, roi_y, roi_x2, roi_y2, data_type, label, template_id)
                         VALUES (:roi_x, :roi_y, :roi_x2, :roi_y2, :data_type, :label, :template_id)
@@ -83,7 +89,7 @@ def extrain_info_single(roi_array, path_template, template_id):
                         'template_id': template_id
                     })
                     connection.commit()  # Commit the transaction
-                    print("Datos insertados correctamente en la tabla 'templates'.")
+                    print("Datos insertados correctamente en la tabla 'roi'.")
 
                     # extrain data of the image
                     if r[2] == 'text':
@@ -95,10 +101,29 @@ def extrain_info_single(roi_array, path_template, template_id):
                         output_path = os.path.join(output_dir, "imageCrop.png")  
                         cv2.imwrite(output_path, imgCrop)
 
-            except Exception as ex:
-                print(f"Error al insertar los datos: {ex}")
+            all_extracted_data["img"] = extracted_texts
+
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+
+            insert_query = sql_text("""
+                INSERT INTO extractions (extracted_data, date, time, duration, processed_documents, template_id)
+                VALUES (:extracted_data, :date, :time, :duration, :processed_documents, :template_id)
+            """)
+            connection.execute(insert_query, {
+                'extracted_data': json.dumps(extracted_texts),  # Convierte el diccionario de textos extraídos a JSON
+                'date': date,
+                'time': currentTime,
+                'duration': str(elapsed_time),  
+                'processed_documents': 1,
+                'template_id': template_id
+            })
+            connection.commit()  # Commit the transaction
+            print("Datos insertados correctamente en la tabla 'extractions'.")
 
 
-    all_extracted_data["img"] = extracted_texts
+    except Exception as ex:
+        print(f"Error al insertar los datos: {ex}")
+
 
     return all_extracted_data
