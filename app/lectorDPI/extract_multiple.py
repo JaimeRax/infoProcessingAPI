@@ -80,6 +80,23 @@ def extrain_info_multiple(roi_array, path_template, path_directory, template_id)
                         # crop to image with roi
                         imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
 
+                        if j == 0:
+                            insert_query = sql_text("""
+                                INSERT INTO roi (roi_x, roi_y, roi_x2, roi_y2, data_type, label, template_id)
+                                VALUES (:roi_x, :roi_y, :roi_x2, :roi_y2, :data_type, :label, :template_id)
+                            """)
+                            connection.execute(insert_query, {
+                                'roi_x': r[0][0],
+                                'roi_y': r[0][1],
+                                'roi_x2': r[1][0],
+                                'roi_y2': r[1][1],
+                                'data_type': r[2],
+                                'label': r[3],
+                                'template_id': template_id
+                            })
+                            connection.commit()  # Commit the transaction
+                            print("Datos insertados correctamente en la tabla 'roi'.")
+
                         # extrain data of the image
                         if r[2] == 'text':
                             best_text = get_best_text(imgCrop)
