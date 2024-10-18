@@ -1,7 +1,6 @@
 from app.common.scripts import inicializandoConexion
 from werkzeug.utils import secure_filename
 from sqlalchemy import text as sql_text  
-from sqlalchemy.orm import Session
 from datetime import datetime
 import zipfile
 import shutil
