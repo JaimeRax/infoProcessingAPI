@@ -1,5 +1,8 @@
 # Ignorar el entorno virtual
 venv/
+unzipped/
+template/
+cropImage/
 
 # Ignorar directorios de medios
 media/
