@@ -16,7 +16,10 @@ def register():
     # Inicializar la conexión a la base de datos
     engine = inicializandoConexion()
     if engine is None:
-        return jsonify({"error": "No se pudo establecer conexión con la base de datos."}), 500
+        return jsonify({
+            "status": False,
+            "error": "No se pudo establecer conexión con la base de datos."
+        }), 500
 
     try:
         # Verificar si el usuario ya existe
@@ -24,7 +27,10 @@ def register():
             existing_user_query = sql_text("SELECT * FROM users WHERE email = :email")
             result = connection.execute(existing_user_query, {'email': email}).fetchone()
             if result:
-                return jsonify({"error": "El usuario ya existe"}), 400
+                return jsonify({
+                    "status": False,
+                    "error": "El usuario ya existe"
+                }), 400
 
             # Insertar nuevo usuario
             hashed_password = generate_password_hash(password)
@@ -35,11 +41,17 @@ def register():
             connection.execute(insert_query, {'email': email, 'password': hashed_password})
             connection.commit()
 
-            return jsonify({"message": "Usuario creado exitosamente"}), 201
+            return jsonify({
+                "status": True,
+                "message": "Usuario creado exitosamente"
+            }), 201
 
     except Exception as ex:
         print(f"Error al registrar el usuario: {ex}")
-        return jsonify({"error": "Error en el registro"}), 500
+        return jsonify({
+            "status": False,
+            "error": "Error en el registro"
+        }), 500
 
 
 # Ruta para iniciar sesión
