@@ -95,8 +95,6 @@ def extract_single():
         # Enviar el archivo .zip generado
         return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
 
-        return response
-        # delete_directories()
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

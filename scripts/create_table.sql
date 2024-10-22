@@ -1,0 +1,58 @@
+CREATE DATABASE infoprocess;
+
+use infoprocess;
+
+CREATE TABLE templates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    filename VARCHAR(255) NOT NULL,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE roi (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    roi_x INT NOT NULL,
+    roi_y INT NOT NULL,
+    roi_x2 INT NOT NULL,
+    roi_y2 INT NOT NULL,
+    data_type VARCHAR(100) NOT NULL,
+    label VARCHAR(255) NOT NULL,
+    template_id INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (template_id) REFERENCES templates(id)
+);
+
+
+CREATE TABLE extractions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    extracted_data JSON NOT NULL,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    duration TIME NOT NULL,
+    processed_documents INT NOT NULL,
+    template_id INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (template_id) REFERENCES templates(id)
+);
+
+CREATE TABLE logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    event_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    message TEXT NOT NULL,
+    level ENUM('info', 'warning', 'error') NOT NULL
+);
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    state BOOLEAN DEFAULT TRUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
