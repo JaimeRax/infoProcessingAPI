@@ -98,3 +98,8 @@ def extract_single():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@lectorDPI.route('/delete_directory', methods=['GET'])
+def delete_directory():
+    result = delete_directories()
+    return jsonify({'status': result})

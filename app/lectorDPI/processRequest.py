@@ -30,12 +30,23 @@ def save_template_image(template_image):
     try:
         # Insert into the database using raw SQL
         with engine.connect() as connection:
+            select_query = sql_text("""
+                    SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM templates
+                """)
+                
+            # Ejecutar la consulta
+            result = connection.execute(select_query)
+            next_id = result.scalar()  # Obtener el valor del siguiente ID
+
+                # Concatenar el siguiente ID con el filename original
+            new_filename = f"{next_id}_{filename}"
+
             insert_query = sql_text("""
                 INSERT INTO templates(filename, date, time, file_path)
                 VALUES (:filename, :date, :time, :file_path)
             """)
             connection.execute(insert_query, {
-                'filename': filename,
+                'filename': new_filename,
                 'date': current_date,
                 'time': current_time,
                 'file_path': image_path
@@ -84,7 +95,10 @@ def delete_directories():
             try:
                 shutil.rmtree(directory) 
                 print(f"Eliminado: {directory}")
+                return True
             except Exception as e:
                 print(f"Error al eliminar {directory}: {e}")
+                return False
         else:
             print(f"El directorio {directory} no existe.")
+            return True
