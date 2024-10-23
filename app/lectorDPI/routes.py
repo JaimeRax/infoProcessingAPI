@@ -5,6 +5,7 @@ from app.lectorDPI.processRequest import delete_directories
 from app.lectorDPI.processRequest import unzip_file 
 from app.lectorDPI.extract_multiple import extrain_info_multiple 
 from app.lectorDPI.extract_single import extrain_info_single 
+from app.lectorDPI.deleteDirectories import remove_old_directories 
 import zipfile, ast, os, json
 
 # Crear un Blueprint para las rutas 
@@ -87,6 +88,8 @@ def extract_single():
 
             else:
                 print(f"No se encontraron imágenes en {output_dir}.")
+
+        remove_old_directories("cropImages", 5)  # Elimina directorios viejos de más de 5 minutos
 
         # Enviar el archivo .zip generado
         return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
