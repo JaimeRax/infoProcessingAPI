@@ -2,7 +2,7 @@ import os
 import time
 import shutil
 
-def remove_old_directories(base_dir="cropImages", age_limit_minutes=5):
+def remove_old_directories(base_dir, age_limit_minutes=5):
     current_time = time.time()
     age_limit_seconds = age_limit_minutes * 60
 

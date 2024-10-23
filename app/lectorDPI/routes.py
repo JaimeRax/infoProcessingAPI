@@ -62,6 +62,7 @@ def extract_multiple():
                 print(f"No se encontraron imágenes en {output_dir}.")
 
         remove_old_directories("cropImages", 5)  # Elimina directorios viejos de más de 5 minutos
+        remove_old_directories("unzipped", 5)  # Elimina directorios viejos de más de 5 minutos
 
         # Enviar el archivo .zip generado
         return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
