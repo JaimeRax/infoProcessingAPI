@@ -49,6 +49,9 @@ To run this project, you will need to add the following environment variables to
 `STORAGE_ROUTE='path_name_route'`
 `STORAGE_ROUTE_BD='path_name_route'`
 
+## Create Database and Tables
+
+run the script located inside the `scripts` folder
 
 ## Run Locally
 
