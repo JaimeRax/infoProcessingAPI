@@ -2,7 +2,7 @@
 venv/
 unzipped/
 template/
-cropImage/
+cropImages/
 
 # Ignorar directorios de medios
 media/
