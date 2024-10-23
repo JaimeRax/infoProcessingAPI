@@ -10,8 +10,9 @@ import os
 
 
 # Main function for processing and cropping the images 
-def extrain_info_single(roi_array, path_template, template_id):
-    output_dir = "cropImage"
+def extrain_info_single(roi_array, path_template, template_id, new_filename):
+    base_dir = "cropImage"
+    output_dir = os.path.join(base_dir,new_filename)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 

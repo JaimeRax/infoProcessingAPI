@@ -60,8 +60,8 @@ def extract_single():
     try:
         roi_array = request.form['roi_array']
         roi = ast.literal_eval(roi_array)
-        template_filename, template_id = save_template_image(template_image)
-        extrain_data = extrain_info_single(roi, template_filename, template_id)
+        template_filename, template_id, new_filename = save_template_image(template_image)
+        extrain_data = extrain_info_single(roi, template_filename, template_id, new_filename)
 
         CROP_IMAGE_FOLDER = 'cropImage/'
 

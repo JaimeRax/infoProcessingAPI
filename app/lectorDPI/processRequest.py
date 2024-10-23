@@ -12,10 +12,6 @@ def save_template_image(template_image):
     if not os.path.exists(upload_folder):
         os.makedirs(upload_folder)
 
-    filename = secure_filename(template_image.filename)
-    image_path = os.path.join(upload_folder, filename)
-    template_image.save(image_path)
-
     # Get current date and time for upload date
     now = datetime.now()
     current_date = now.date()  
@@ -30,6 +26,10 @@ def save_template_image(template_image):
     try:
         # Insert into the database using raw SQL
         with engine.connect() as connection:
+
+            # obtain image name
+            filename = secure_filename(template_image.filename)
+
             select_query = sql_text("""
                     SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM templates
                 """)
@@ -38,8 +38,12 @@ def save_template_image(template_image):
             result = connection.execute(select_query)
             next_id = result.scalar()  # Obtener el valor del siguiente ID
 
-                # Concatenar el siguiente ID con el filename original
+            # Concatenar el siguiente ID con el filename original
             new_filename = f"{next_id}_{filename}"
+
+            image_path = os.path.join(upload_folder, new_filename)
+            template_image.save(image_path)
+
 
             insert_query = sql_text("""
                 INSERT INTO templates(filename, date, time, file_path)
@@ -63,7 +67,7 @@ def save_template_image(template_image):
         print(f"Error al insertar los datos: {ex}")
         return None, None
 
-    return image_path, template_id
+    return image_path, template_id, new_filename
 
 # function to unzip the zip file
 def unzip_file(zip_file):
@@ -88,7 +92,7 @@ def unzip_file(zip_file):
 
 # function to delete directories
 def delete_directories():
-    directories = ['template/', 'unzipped/', 'cropImage/'] 
+    directories = ['cropImage/'] 
     
     for directory in directories:
         if os.path.exists(directory):
