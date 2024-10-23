@@ -11,8 +11,9 @@ import os
 
 # Main function for processing and cropping the images 
 def extrain_info_single(roi_array, path_template, template_id, new_filename):
-    base_dir = "cropImage"
-    output_dir = os.path.join(base_dir,new_filename)
+    base_dir = "cropImages"
+    output_dir = os.path.join(base_dir, new_filename)
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -131,4 +132,4 @@ def extrain_info_single(roi_array, path_template, template_id, new_filename):
     except Exception as ex:
         print(f"Error al insertar los datos: {ex}")
 
-    return all_extracted_data
+    return all_extracted_data, output_dir

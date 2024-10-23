@@ -61,40 +61,35 @@ def extract_single():
         roi_array = request.form['roi_array']
         roi = ast.literal_eval(roi_array)
         template_filename, template_id, new_filename = save_template_image(template_image)
-        extrain_data = extrain_info_single(roi, template_filename, template_id, new_filename)
-
-        CROP_IMAGE_FOLDER = 'cropImage/'
+        
+        filename_without_extension = os.path.splitext(new_filename)[0]
+        extrain_data, output_dir = extrain_info_single(roi, template_filename, template_id, filename_without_extension)
 
         # Crear el archivo .txt o .json con los datos extraídos
-        output_filename = f"{template_id}_data.json"
-        output_filepath = os.path.join(CROP_IMAGE_FOLDER, output_filename)
-        
+        output_filename = f"{filename_without_extension}.json"
+        output_filepath = os.path.join(output_dir, output_filename)
+
         with open(output_filepath, 'w') as f:
             json.dump(extrain_data, f, indent=2)  # Guardar los datos en formato JSON
 
         # Nombre y ruta para el archivo ZIP
-        zip_filename = f"{template_id}_output.zip"
-        zip_filepath = os.path.join(CROP_IMAGE_FOLDER, zip_filename)
+        zip_filename = f"{filename_without_extension}.zip"
+        zip_filepath = os.path.join("cropImages", zip_filename)
 
         # Crear el archivo ZIP
         with zipfile.ZipFile(zip_filepath, 'w') as zipf:
-            # Añadir el archivo de datos JSON al ZIP
-            zipf.write(output_filepath, output_filename)
-
-            # Verificar si la carpeta CropImage existe
-            if os.path.exists(CROP_IMAGE_FOLDER) and os.listdir(CROP_IMAGE_FOLDER):
-                # Añadir las imágenes recortadas al ZIP
-                for root, dirs, files in os.walk(CROP_IMAGE_FOLDER):
+            if os.path.exists(output_dir) and os.listdir(output_dir):
+                for root, dirs, files in os.walk(output_dir):
                     for file in files:
-                        if file not in [zip_filename, output_filename]:
-                            zipf.write(os.path.join(root, file), file)
+                        file_path = os.path.join(root, file)
+                        # zipf.write(file_path, output_dir)
+                        zipf.write(file_path, os.path.relpath(file_path, output_dir))
+
             else:
-                # Si la carpeta no existe o está vacía, solo agregamos el archivo JSON
-                print(f"No se encontraron imágenes en {CROP_IMAGE_FOLDER}.")
+                print(f"No se encontraron imágenes en {output_dir}.")
 
         # Enviar el archivo .zip generado
         return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
-
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
