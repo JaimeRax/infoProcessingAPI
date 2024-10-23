@@ -19,7 +19,7 @@ def index():
 
 
 # route to the extract multiple files
-@lectorDPI.route('/extract_multiple')
+@lectorDPI.route('/extract_multiple', methods=['POST'])
 def extract_multiple():
     if 'template_image' not in request.files or 'zip_file' not in request.files or 'roi_array' not in request.form:
         return jsonify({'error': 'Faltan archivos. Se requieren template_image y zip_file y roi_array.'}), 400
@@ -33,17 +33,42 @@ def extract_multiple():
     try:
         roi_array = request.form['roi_array']
         roi = ast.literal_eval(roi_array)
-        template_filename, template_id = save_template_image(template_image)
+        template_filename, template_id, new_filename = save_template_image(template_image)
         extracted_files = unzip_file(zip_file)
-        extrain_data = extrain_info_multiple(roi, template_filename, extracted_files, template_id)
-        # delete_directories()
+
+        filename_without_extension = os.path.splitext(new_filename)[0]
+        extrain_data, output_dir = extrain_info_multiple(roi, template_filename, extracted_files, template_id, filename_without_extension)
+
+        # Crear el archivo .txt o .json con los datos extraídos
+        output_filename = f"{filename_without_extension}.json"
+        output_filepath = os.path.join(output_dir, output_filename)
+
+        with open(output_filepath, 'w') as f:
+            json.dump(extrain_data, f, indent=2)  # Guardar los datos en formato JSON
+
+        # Nombre y ruta para el archivo ZIP
+        zip_filename = f"{filename_without_extension}.zip"
+        zip_filepath = os.path.join("cropImages", zip_filename)
+
+        # Crear el archivo ZIP
+        with zipfile.ZipFile(zip_filepath, 'w') as zipf:
+            if os.path.exists(output_dir) and os.listdir(output_dir):
+                for root, dirs, files in os.walk(output_dir):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        zipf.write(file_path, os.path.relpath(file_path, output_dir))
+
+            else:
+                print(f"No se encontraron imágenes en {output_dir}.")
+
+        remove_old_directories("cropImages", 5)  # Elimina directorios viejos de más de 5 minutos
+
+        # Enviar el archivo .zip generado
+        return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    return jsonify({
-        'information': extrain_data,
-    })
 
 
 
@@ -83,7 +108,6 @@ def extract_single():
                 for root, dirs, files in os.walk(output_dir):
                     for file in files:
                         file_path = os.path.join(root, file)
-                        # zipf.write(file_path, output_dir)
                         zipf.write(file_path, os.path.relpath(file_path, output_dir))
 
             else:
@@ -97,7 +121,3 @@ def extract_single():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@lectorDPI.route('/delete_directory', methods=['GET'])
-def delete_directory():
-    result = delete_directories()
-    return jsonify({'status': result})

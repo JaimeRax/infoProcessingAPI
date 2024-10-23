@@ -9,14 +9,18 @@ import cv2
 import os
 
 # Main function for processing and cropping the images 
-def extrain_info_multiple(roi_array, path_template, path_directory, template_id):
-    output_dir = "cropImage"
+def extrain_info_multiple(roi_array, path_template, path_directory, template_id, new_filename):
+    base_dir = "cropImages"
+    output_dir = os.path.join(base_dir, new_filename)
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     load_dotenv() # load the .env file 
     base_path = os.getenv('PATH_INFO')
+
     template_image = os.path.join(base_path, path_template)
+
     imgQ = cv2.imread(template_image)
     per = 25
     h,w,c = imgQ.shape
@@ -136,5 +140,5 @@ def extrain_info_multiple(roi_array, path_template, path_directory, template_id)
     except Exception as ex:
         print(f"Error al insertar los datos: {ex}")
 
-    return all_extracted_data
+    return all_extracted_data, output_dir
 
