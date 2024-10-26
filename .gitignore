@@ -4,6 +4,9 @@ unzipped/
 template/
 cropImages/
 
+# Ignorar archivos
+.env
+
 # Ignorar directorios de medios
 media/
 img/
