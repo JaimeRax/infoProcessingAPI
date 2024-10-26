@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request, send_file, make_response
 from app.common.scripts import inicializandoConexion
 from app.lectorDPI.processRequest import save_template_image 
-from app.lectorDPI.processRequest import delete_directories
 from app.lectorDPI.processRequest import unzip_file 
 from app.lectorDPI.extract_multiple import extrain_info_multiple 
 from app.lectorDPI.extract_single import extrain_info_single 
@@ -117,7 +116,7 @@ def extract_single():
         remove_old_directories("cropImages", 5)  # Elimina directorios viejos de más de 5 minutos
 
         # Enviar el archivo .zip generado
-        return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
+        return send_file(zip_filepath, as_attachment=True, download_name=zip_filename, mimetype='application/zip')
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
