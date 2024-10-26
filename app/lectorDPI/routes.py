@@ -5,7 +5,7 @@ from app.lectorDPI.processRequest import unzip_file
 from app.lectorDPI.extract_multiple import extrain_info_multiple 
 from app.lectorDPI.extract_single import extrain_info_single 
 from app.lectorDPI.deleteDirectories import remove_old_directories 
-import zipfile, ast, os, json
+import zipfile, ast, os, json, time
 
 # Crear un Blueprint para las rutas 
 lectorDPI = Blueprint('lectorDPI', __name__)
@@ -45,6 +45,14 @@ def extract_multiple():
         with open(output_filepath, 'w') as f:
             json.dump(extrain_data, f, indent=2)  # Guardar los datos en formato JSON
 
+        # Crear el archivo .txt con los mismos datos
+        output_filename_txt = f"{filename_without_extension}.txt"
+        output_filepath_txt = os.path.join(output_dir, output_filename_txt)
+
+        with open(output_filepath_txt, 'w') as f:
+            for key, value in extrain_data.items():
+                f.write(f"{key}: {value}\n")  # Escribir cada dato en una nueva línea en formato texto
+
         # Nombre y ruta para el archivo ZIP
         zip_filename = f"{filename_without_extension}.zip"
         zip_filepath = os.path.join("cropImages", zip_filename)
@@ -64,7 +72,7 @@ def extract_multiple():
         remove_old_directories("unzipped", 5)  # Elimina directorios viejos de más de 5 minutos
 
         # Enviar el archivo .zip generado
-        return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
+        return send_file(zip_filepath, as_attachment=True, download_name=zip_filename,mimetype='application/zip')
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -98,6 +106,14 @@ def extract_single():
         with open(output_filepath, 'w') as f:
             json.dump(extrain_data, f, indent=2)  # Guardar los datos en formato JSON
 
+        # Crear el archivo .txt con los mismos datos
+        output_filename_txt = f"{filename_without_extension}.txt"
+        output_filepath_txt = os.path.join(output_dir, output_filename_txt)
+
+        with open(output_filepath_txt, 'w') as f:
+            for key, value in extrain_data.items():
+                f.write(f"{key}: {value}\n")  # Escribir cada dato en una nueva línea en formato texto
+
         # Nombre y ruta para el archivo ZIP
         zip_filename = f"{filename_without_extension}.zip"
         zip_filepath = os.path.join("cropImages", zip_filename)
@@ -114,6 +130,9 @@ def extract_single():
                 print(f"No se encontraron imágenes en {output_dir}.")
 
         remove_old_directories("cropImages", 5)  # Elimina directorios viejos de más de 5 minutos
+        remove_old_directories("unzipped", 5)  # Elimina directorios viejos de más de 5 minutos
+
+        time.sleep(5)
 
         # Enviar el archivo .zip generado
         return send_file(zip_filepath, as_attachment=True, download_name=zip_filename, mimetype='application/zip')
