@@ -6,7 +6,8 @@ from flask_cors import CORS
 
 #Instanciando el objeto para nuestra app
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": ["https://interfaceinfoprocessing.vercel.app"]}})
+
 
 #Definicion de rutas
 app.register_blueprint(lectorDPI, url_prefix='/api/lectorDPI/')

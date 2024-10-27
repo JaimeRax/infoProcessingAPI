@@ -9,7 +9,7 @@ def get_best_text(cropped_image):
     for threshold_value in range(50,220,10):
         _, thresholded_img = cv2.threshold(gray_image, threshold_value, 255, cv2.THRESH_BINARY) # use umbral
 
-        text = pytesseract.image_to_string(thresholded_img, config=f"--psm 6 -l spa")
+        text = pytesseract.image_to_string(thresholded_img, config=f"--tessdata-dir /usr/share/tesseract-ocr/5/tessdata --psm 6 -l spa")
 
         # add text in the list
         if text.strip():
