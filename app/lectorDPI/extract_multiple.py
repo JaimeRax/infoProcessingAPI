@@ -1,3 +1,4 @@
+from app.lectorDPI.extract_data import extract_paragraph_text 
 from app.lectorDPI.extract_data import get_best_text 
 from app.common.scripts import inicializandoConexion
 from sqlalchemy import text as sql_text
@@ -100,6 +101,10 @@ def extrain_info_multiple(roi_array, path_template, path_directory, template_id,
                             })
                             connection.commit()  # Commit the transaction
                             print("Datos insertados correctamente en la tabla 'roi'.")
+
+                        if r[2] == 'parrafo':
+                            best_text = extract_paragraph_text(imgCrop)
+                            extracted_texts[r[3]] = best_text
 
                         # extrain data of the image
                         if r[2] == 'text':

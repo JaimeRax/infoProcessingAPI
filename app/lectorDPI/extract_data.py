@@ -20,3 +20,17 @@ def get_best_text(cropped_image):
         return best_text.replace('\n', ' ')  # return text
     else:
         return ""  
+
+# Function to extract paragraph text
+def extract_paragraph_text(image):
+    # Convert image to grayscale
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
+    # Extract text as a single paragraph
+    text = pytesseract.image_to_string(
+        gray_image, 
+        config="--tessdata-dir /usr/share/tesseract-ocr/5/tessdata --psm 6 -l spa"
+    )
+    
+    # Clean up the text (remove newline characters)
+    return text.replace('\n', ' ').strip()
